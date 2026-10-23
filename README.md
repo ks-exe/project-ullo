@@ -14,7 +14,7 @@ decisions, and incident reports in a Streamlit dashboard.
 
 **Good data becomes Parquet. Broken data becomes an actionable incident.**
 
-[Quick start](#quick-start) · [Demo walkthrough](#demo-walkthrough) ·
+[Image gallery](#image-gallery) · [Quick start](#quick-start) · [Demo walkthrough](#demo-walkthrough) ·
 [Architecture](#architecture) · [AI workflow](#ai-workflow) ·
 [AWS deployment](docs/DEPLOYMENT.md) · [Current limits](#current-limits)
 
@@ -43,6 +43,42 @@ dataset was accepted, rejected, quarantined, or escalated.
 The data-quality checks are deterministic. AI enters the workflow after a
 failure, where it helps choose tools and explain the incident. Model output is
 validated before dispatch, and the application preserves the original Bronze file.
+
+## Image gallery
+
+The seven submission images are in [`image-gallery/`](image-gallery/).
+Each PNG is **2100 × 1400 pixels (3:2)** and **under 0.7 MB**, within the
+gallery's 5 MB per-image and 15-image limits. Click an image to view it at full size.
+
+### Architecture overview
+
+[![Architecture concept connecting Dagster, S3, RDS, Strands Decider, Bedrock, and Streamlit](image-gallery/01-architecture-overview.png)](image-gallery/01-architecture-overview.png)
+
+This is the original concept illustration. The implementation writes Silver as
+Parquet, supports a configurable Bedrock report model, and gates retries without
+automatically launching them.
+
+### Pipeline execution
+
+| Clean batch succeeds | Broken batch creates an incident |
+| --- | --- |
+| [![Dagster run with successful Bronze and Silver steps](image-gallery/02-clean-pipeline-run.png)](image-gallery/02-clean-pipeline-run.png) | [![Dagster Silver validation failure with a pending incident and redacted S3 source](image-gallery/03-data-quality-failure.png)](image-gallery/03-data-quality-failure.png) |
+
+### Investigation and evidence
+
+| Pending incident queue | Missing-column evidence |
+| --- | --- |
+| [![Streamlit incident queue showing types, severity, and review controls](image-gallery/04-incident-queue.png)](image-gallery/04-incident-queue.png) | [![Incident evidence identifying a missing currency column](image-gallery/05-schema-evidence.png)](image-gallery/05-schema-evidence.png) |
+
+### Decisions and human review
+
+| Recorded AI decisions | Operator review and incident report |
+| --- | --- |
+| [![Decision history with phases, selected tools, confidence, and reasoning](image-gallery/06-ai-decision-trace.png)](image-gallery/06-ai-decision-trace.png) | [![Incident review with mark-resolved selected, an operator note, and the report tab](image-gallery/07-human-review-and-report.png)](image-gallery/07-human-review-and-report.png) |
+
+The screenshots show individual demo sessions. The S3 source identifier is
+redacted for public sharing; the visible run outcomes and decision values are
+preserved. Marking an incident resolved updates its status, not its source data.
 
 ## Architecture
 
@@ -333,6 +369,7 @@ run_configs/           Ready-to-run schema-drift demo
 scripts/               App launcher, demo runner, and AWS deployment helper
 deploy/aws/            Hosting template, bootstrap, and service definitions
 docs/DEPLOYMENT.md      AWS setup and maintenance guide
+image-gallery/         Seven captioned PNGs ready for the hackathon submission
 tests/                 Automated regression tests
 ```
 
